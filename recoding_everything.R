@@ -1,3 +1,6 @@
+abc <- read_dta("abc_final.dta")
+
+
 ## Church Growth
 abc$grow <- abc$q2 + abc$q7 + abc$q50
 abc$grow[abc$grow==1] <- "Declined in Total Membership"
@@ -17,6 +20,17 @@ abc$pol2 <- abc$q10_1 + abc$q10_2 + abc$q10_3 + abc$q10_4 + abc$q10_5 + abc$q10_
 abc$pol3 <- abc$q13_1 + abc$q13_2 + abc$q13_3 + abc$q13_4 + abc$q13_5 + abc$q13_6 + abc$q13_7 + abc$q13_8 + abc$q13_9 + abc$q13_10
 abc$pol <- abc$pol1 + abc$pol2 + abc$pol3
 
+abc$vote <- abc$q5_1 + abc$q10_1 + abc$q13_1
+abc$contact <- abc$q5_2 + abc$q10_2 + abc$q13_2
+abc$donate <- abc$q5_3 + abc$q10_3 + abc$q13_3
+abc$vol1 <- abc$q5_4 + abc$q10_4 + abc$q13_4
+abc$volig <- abc$q5_5 + abc$q10_5 + abc$q13_5
+abc$urge <- abc$q5_6 + abc$q10_6 + abc$q13_6
+abc$protest <- abc$q5_7 + abc$q10_7 + abc$q13_7
+abc$rally <- abc$q5_8 + abc$q10_8 + abc$q13_8
+abc$study <- abc$q5_9 + abc$q10_9 + abc$q13_9
+abc$register <- abc$q5_10 + abc$q10_10 + abc$q13_10
+
 ##Outreach activities
 abc$out1 <- recode(abc$q6_1, "1=1; else=0")
 abc$out2 <- recode(abc$q6_2, "1=1; else=0")
@@ -32,6 +46,11 @@ abc$out9 <- recode(abc$q14_1, "1=1; else=0")
 abc$out10 <- recode(abc$q14_2, "1=1; else=0")
 abc$out11 <- recode(abc$q14_3, "1=1; else=0")
 abc$out12 <- recode(abc$q14_4, "1=1; else=0")
+
+abc$outevent <- abc$out1 + abc$out5 + abc$out9 
+abc$outworship <- abc$out2 + abc$out6 + abc$out10
+abc$outcomm <- abc$out3 + abc$out7 + abc$out11
+abc$outmail <- abc$out4 + abc$out8 + abc$out12
 
 abc$out <- abc$out1 + abc$out2 + abc$out3 + abc$out4 + abc$out5 + abc$out6 + abc$out7 + abc$out8 + abc$out9 + abc$out10 + abc$out11 + abc$out12 
 
@@ -57,6 +76,13 @@ abc$state15 <- recode(abc$q25_3, "1=1; else=0")
 abc$state16 <- recode(abc$q25_4, "1=1; else=0")
 abc$state17 <- recode(abc$q25_5, "1=1; else=0")
 abc$state18 <- recode(abc$q25_6, "1=1; else=0")
+
+abc$sign <- abc$state1 + abc$state7 + abc$state13
+abc$bumper <- abc$state2 + abc$state8 + abc$state14
+abc$demonstrate <- abc$state3 + abc$state9 + abc$state15
+abc$button <- abc$state4 + abc$state10 + abc$state16
+abc$petition <- abc$state5 + abc$state11 + abc$state17
+abc$letter <- abc$state6 + abc$state12 + abc$state18
 
 abc$state <- abc$state1 + abc$state2 + abc$state3 + abc$state4 + abc$state5 + abc$state6 + abc$state7 + abc$state8 + abc$state9 + abc$state10 + abc$state11 + abc$state12 + abc$state13 + abc$state14 + abc$state15 + abc$state16 + abc$state17 + abc$state18
 
@@ -264,7 +290,12 @@ abc$yrscong <- abc$q45_2_text
 
 ## Age
 abc$age<- 2016 - abc$q46_1
+abc$age[abc$age ==2016] <- NA
 
 ## Education
 
-abc$educ <- abc$q48
+abc$educ <- factor(abc$q48)
+abc$educ <- ordered(abc$educ, levels = c(3,4,5,6), labels = c("Some College", "College Degree", "Graduate Work", "Doctoral Degree"))
+
+
+write.csv(abc, "abc_final.csv")
