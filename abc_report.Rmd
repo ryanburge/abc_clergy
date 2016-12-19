@@ -1,0 +1,177 @@
+---
+title: "ABC Clergy Survey"
+author: "Ryan Burge"
+date: "December 17, 2016"
+output: html_document
+---
+
+## Introduction
+
+In the fall of 2016, Dr. Ryan Burge and Dr. Paul Djupe administered an electronic survey in clergy from the American Baptist Churches of the USA denomination. This survey was open from October 25th until November 7th. The opportunity to take the survey was offered through an email correspondence and the Qualtrics survey platform was used to pose the questions and record the results. In total 1314 emails were sent. The total number of clergy who began the survey was 246, however there was a significant amount of roll-off there were some questions where the number of respondents dropped to 168. 
+
+A disclaimer must be attached to these results at the beginning. This survey is not a representative sample of the clergy of the ABcUSA. This is for two primary reasons: sample size and the way that this survey was conducted. According to Wikipedia, the ABCUSA has 5,402 congregations. We received responses from less than 3% of all the pastors in the denomination. It's likely that if another random sample of 200 pastors answered this survey the answers would like different, maybe extremely different in some cases. 
+
+The second reason is that this sample is not random. This is likely because of how we collected our questionnaire: through email. Small congregations are typically less technologically advanced and therefore don't have an email address. The pastors that we sampled are highly educated as well as pastor churches that have average attendance that is much higher than what one would assume. This is displayed below
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+abc <- read.csv("abc_final.csv", stringsAsFactors = FALSE)
+abc$educ <- factor(abc$q48)
+abc$educ <- ordered(abc$educ, levels = c(3,4,5,6), labels = c("Some College", "College Degree", "Graduate Work", "Doctoral Degree"))
+ggplot(na.omit(abc), aes(educ)) + geom_bar() + ggtitle("                                            Education Level") + xlab("Highest Degree Achieved") + ylab("Number of Respondents")
+```
+
+The sample that we collected was highly educated. Which nearly 80% of the sample having completed at least some coursework at the graduate level. It seems highly doubtful that this trend will remain consistent across the entire denomination. 
+
+In regard to age, responses ranged from 29 years old to 85 years old with the mean age being 56. 
+
+
+## Church Characteristics 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+abc$attendance <- as.numeric(abc$attendance)
+qplot(attendance, data=abc, geom="histogram", bins = 45,  fill = "red") + xlab("Average Weekly Attendance") + theme(legend.position="none") + ylab("Number of Churches") + ggtitle("                                                Average Attendance")
+```
+
+The average attendance figures comport much closer to statistics that are commonly used when discussing church attendance. The median attendance reported was 85, however there were a number of churches in the sample with larger attendance up to 550 individuals. A finding worth noting is that there was no statistical relationship in the data between the age of the clergy and the size of their congregation or the amount of education of the resopndent and their education level. 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(abc %>% filter(grow >0), aes(grow, fill = "blue")) + geom_bar() + xlab("How has attendance changed in the last 12 months?") + theme(legend.position="none") + ylab("Number of Responses") + ggtitle("                                                     Church Growth")
+```
+
+Many of the churches in the sample were not experiencing what the rest of the ABCUSA has been undergoing: a significant decline in members. In fact, only 18% of the clergy surveyed their church had declined in size in the last year and 34% saw an increase in average attendance. Almost half the sample saw no change. Over three quarters of pastors said that they didn't feel competition from other churches for members. 
+
+When asked to described the economic class of their members nearly 60% of pastors said that their congregation was primarily middle class, while 15% said their congregation was upper middle class and 25% said their congregation was lower middle class. 
+
+In addition, we asked clergy to assess if their congregation was different than the individual community on a number of components including racial, political, and religious differences. The vast majority of pastors thought their fell in the middle of believing that their congregation was similar to the community and feeling that it was different. 
+
+## Church Outreach
+
+We posed a series of questions regarding how the church has tried to reach out to potential new members. They were asked if the church had sponsored an outreach event, used different worship materials, had a recruitment committee, or mailed letters or flyers to attract membership. 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+abc$outevent <- abc$out1 + abc$out5 + abc$out9 
+abc$outworship <- abc$out2 + abc$out6 + abc$out10
+abc$outcomm <- abc$out3 + abc$out7 + abc$out11
+abc$outmail <- abc$out4 + abc$out8 + abc$out12
+outreach <- abc %>% summarise(sum_event = sum(outevent), sum_worship = sum(outworship), sum_comm = sum(outcomm), sum_mail = sum(outmail))
+outreach <- as.data.frame(t(outreach))
+outreach$type <- c("Outreach Event", "Changed Worship", "Outreach Committee", "Mailed Flyers") 
+ggplot(outreach, aes(x=type, y= V1)) + geom_col() + coord_flip() + xlab("Type of Activity") + ylab("Number of Respondents")
+```
+
+The results indicated that churches are attempting outreach activities. Two thirds of respondents said that their church had held an outreach event and nearly half the sample indicating that they had made changes to their style of worship to be more attractive to potential new members. 
+
+## ABC Involvement
+
+We asked pastors a series of three questions regarding how much involvement the ABCUSA should have on social and political issues, fostering debate about these issues inside the religious body, and lobbying the government in regard to these issues. These three questions were combined into an index with 0 indicating less involvement and 1 indicating more involvement. 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(abc %>% filter(involve >0), aes(involve)) + geom_bar() + xlab("ABC Involvement Score") + theme(legend.position="none") + ylab("Number of Respondents") + ggtitle("                                          How involved should the ABC be?")
+```
+
+This data seems to indicate that pastors want to see a more active denominational leadership. The mean score was .61 for the entire sample. However, what is worth noting is when this ABC involvement scale is considered in light of which political candidate the respondent was going to cast their ballot for in the presidential election. The mean score for clinton voters was .74, but the mean score for Trump voters was .51 with Gary Johnson voters splitting the difference at .67. 
+
+## Political Issues 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+vote <- abc %>% group_by(votechoice) %>%  summarise(total.count= n()) %>%  arrange(desc(total.count))
+vote <- vote[-c(3),]
+ggplot(vote, aes(x=reorder(votechoice, -total.count), y=total.count)) + geom_col() + xlab("Candidate") + theme(legend.position="none") + ylab("Number of Respondents") + ggtitle("                                         2016 Presidential Election Vote Choice")
+```
+
+We asked respondents who they chose to vote for in the 2016 presidential campaigns. 41% chose Hillary Clinton as their candidate while 30% chose Trump, however nearly as many clergy (29%) chose something else, whether it be not voting or casting a ballot for a third party candidate.
+
+We followed up by asking what was the most important factor in deciding who they were going to vote for in the election. The most popular response items were: temperament, judicial appointments, and abortion. 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(abc %>% filter(q66_1 >0), aes(q66_1)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
+  scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) + 
+  ggtitle("                        Public support for Donald Trump will hurt Christian witness ") + 
+  ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90))
+```
+
+We presented respondents with a number of statements about the presidential election and then asked them to respond on a scale from "strong agree" to "strongly disagree." A significant portion of the sample expressed serious reservations about the impact Donald Trump is going to have on Christian witness going forward. What is more fascinating is that one third of clergy who say that they are going to vote for Trump also agree that support for him will hurt Christian witness and 30% "neither agree or disagree" with the statement.
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(abc %>% filter(q66_2 >0), aes(q66_2)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
+  scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) + 
+  ggtitle("           Moving a conservative agenda is worth any price of supporting Trump ") + 
+  ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90))
+```
+
+There was overwhelming disagreement with the statement: "Moving a conservative agenda is worth any price of supporting Trump." Over 70% of the sample disagreed with that statement, even one third of Trump voters.  
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(abc %>% filter(q66_5 >0), aes(q66_5)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
+  scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) + 
+  ggtitle(" The bond between evangelicals and the Republican Party is a healthy lasting one.  ") + 
+  ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90))
+```
+
+We also asked clergy if they think that relationship between evangelicalism and the Republican Party is a healthy one. The clergy responded to this question with an ovewhelmingly negative attitude. Just 8% of the total sample agreed that the relationship was a positive one. Over 80% of Hillary Clinton supporters had a negative view of the link between evangelicalism and Republican politics. 
+
+## Clergy Political Activity
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+abc$sign <- abc$state1 + abc$state7 + abc$state13
+abc$bumper <- abc$state2 + abc$state8 + abc$state14
+abc$demonstrate <- abc$state3 + abc$state9 + abc$state15
+abc$button <- abc$state4 + abc$state10 + abc$state16
+abc$petition <- abc$state5 + abc$state11 + abc$state17
+abc$letter <- abc$state6 + abc$state12 + abc$state18
+action <- abc %>% summarise(sum_sign = sum(sign), sum_bumper = sum(bumper), sum_demonstrate = sum(demonstrate), sum_button = sum(button), sum_petition = sum(petition), sum_letter = sum(letter))
+final_action <- as.data.frame(t(action))
+final_action$type <- c("Sign a Petition", "Bumper Sticker", "Demonstration", "Wear a Button", "Sign a Petition", "Letter to Rep")
+ggplot(final_action, aes(x=reorder(type, V1), y= V1)) + geom_col() + coord_flip() + xlab("Type of Political Act") + ylab("Number of Respondents")
+```
+
+We wanted to get a handle on how willing clergy were to engage in political activities. We asked if they would be willing to wear a political button, put a bumper sticker on their car, participate in a demonstration, sign a petition that would appear in the local newspaper, or write a letter to their U.S. representative. 
+
+It seems that clergy are much more willing to take a less visible action than one that has higher visibility. For example, wearing a button in public and putting a bumper sticker on their car were activities not frequently engaged in, while signing a petition and writing a letter were much more pervasive. 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+abc$vote <- abc$q5_1 + abc$q10_1 + abc$q13_1
+abc$contact <- abc$q5_2 + abc$q10_2 + abc$q13_2
+abc$donate <- abc$q5_3 + abc$q10_3 + abc$q13_3
+abc$vol1 <- abc$q5_4 + abc$q10_4 + abc$q13_4
+abc$volig <- abc$q5_5 + abc$q10_5 + abc$q13_5
+abc$urge <- abc$q5_6 + abc$q10_6 + abc$q13_6
+abc$protest <- abc$q5_7 + abc$q10_7 + abc$q13_7
+abc$rally <- abc$q5_8 + abc$q10_8 + abc$q13_8
+abc$study <- abc$q5_9 + abc$q10_9 + abc$q13_9
+abc$register <- abc$q5_10 + abc$q10_10 + abc$q13_10
+polact <- abc %>% summarise(sum_vote = sum(vote), sum_contact = sum(contact), sum_donate = sum(donate), sum_vol1 = sum(vol1), sum_volig = sum(volig), sum_urge = sum(urge), sum_protest = sum(protest), sum_rally= sum(rally), sum_study= sum(study), sum_register= sum(register))
+polact <- as.data.frame(t(polact))
+polact$type <- c("Voted", "Contacted Rep.", "Donated Money", "Campaign Volunteer", "Interest Group Volunteer", "Encouraged Cong. to Vote", "Protested", "Attended a Rally", "Started a Political Study Group", "Registration Drive in Church")
+ggplot(polact, aes(x=reorder(type, V1), y= V1)) + geom_col() + coord_flip() + xlab("Type of Political Act") + ylab("Number of Respondents")
+```
+
+This is also evident in another set of questions where we asked clergy which political activities that they have engaged in. The most popular action was voting, followed by encouraging their congregation to vote. 
+
+## Clergy Theology
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(Rmisc)
+library(tibble)
+testCI <- CI(abc$relcon1)
+testCI2 <- CI(abc$relcon2)
+testCI3 <- CI(abc$relcon3)
+testCI4 <- CI(abc$relcon4)
+testCI5 <- CI(abc$relcon5)
+testCI6 <- CI(abc$relcon6)
+cidf <- rbind(testCI, testCI2, testCI3, testCI4, testCI5, testCI6)
+cidf <- as_tibble(cidf)
+cidf$factor <- c("Devil Exists", "Literal Bible", "Jesus Bodily Return", "Virgin Birth" , "Absolute Truth", "Male Authority")
+limits <- aes(ymax = cidf$upper, ymin= cidf$lower)
+ggplot(cidf, aes(x=reorder(factor, mean), y=mean)) + geom_point() + coord_flip() + geom_errorbar(limits, width=0.15 ) + xlab("Theology Statements") + ylab("Higher Values = More Conservative")
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+labels <- abc %>% summarise(evangelical = sum(q42_1), fundie = sum(q42_2), liberal = sum(q42_3), orthodox = sum(q42_4), ecumenical = sum(q42_5), pentecostal = sum(q42_6), conservative = sum(q42_7), emergent = sum(q42_8))
+labels <- as.data.frame(t(labels))
+labels$type <- c("Evangelical", "Fundamentalist", "Liberal", "Orthodox", "Ecumenical", "Pentecostal", "Conservative", "Emergent")
+ggplot(labels, aes(x=reorder(type, V1), y= V1)) + geom_col() + coord_flip() + xlab("Religious Label") + ylab("Number of Respondents")
+```
