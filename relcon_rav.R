@@ -4,6 +4,10 @@ library(dplyr)
 
 abc <- read_dta("abc_final.dta")
 
+is.nan.data.frame <- function(x)
+  do.call(cbind, lapply(x, is.nan))
+abc[is.nan(abc)] <- 0
+
 
 abc$rav1 <- abc$q18_2
 abc$rav2 <- abc$q18_3
