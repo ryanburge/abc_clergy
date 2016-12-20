@@ -171,8 +171,8 @@ abc$votechoice[abc$votechoice==0] <- "No Answer"
 
 ## Congregation Vote
 
-abc$hrcshare <- abc$q22_1
-abc$djtshare <- abc$q22_2
+abc$djtshare <- abc$q22_1
+abc$hrcshare <- abc$q22_2
 abc$hrcshare[abc$hrcshare == 0] <- NA
 abc$djtshare[abc$djtshare == 0] <- NA
 
