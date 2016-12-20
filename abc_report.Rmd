@@ -16,6 +16,9 @@ The second reason is that this sample is not random. This is likely because of h
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 library(dplyr)
 library(ggplot2)
+library(RColorBrewer)
+library(gridExtra)
+library(grid)
 abc <- read.csv("abc_final.csv", stringsAsFactors = FALSE)
 abc$educ <- factor(abc$q48)
 abc$educ <- ordered(abc$educ, levels = c(3,4,5,6), labels = c("Some College", "College Degree", "Graduate Work", "Doctoral Degree"))
@@ -76,6 +79,15 @@ This data seems to indicate that pastors want to see a more active denominationa
 ## Political Issues 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
+abc$partyid <- factor(abc$q39, levels=unique(abc$q39))
+abc$partyid <- factor(abc$q39, levels = c(1,2,3,4,5,6,7),labels = c("Strong Democrat", "Moderate Democrat", "Lean Democrat", "Independent","Lean Republican", "Moderate Republican", "Strong Republican"))
+ggplot(na.omit(abc), aes(x= partyid, fill=factor(partyid)), color= factor(partyid)) + geom_bar() + theme(axis.text.x = element_text(angle = 90)) + scale_fill_brewer(palette="RdBu", direction=-1) + theme(legend.position="none") + xlab("Party Identification") + ylab("Number of Respondents")
+```
+
+In regard to general party affiliation, the sample leans slight to the right. The distribution somewhat resembles a normal distributin insofar as the most extreme option were the least likely to be chosen. However in a normal distribution one would expect the middle option, in this case "Independent", would represent the largest group of respondents. However if our sample, the largest group were those who chose "Lean Republican." How would this translate to their choice for president in 2016? 
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 vote <- abc %>% group_by(votechoice) %>%  summarise(total.count= n()) %>%  arrange(desc(total.count))
 vote <- vote[-c(3),]
 ggplot(vote, aes(x=reorder(votechoice, -total.count), y=total.count)) + geom_col() + xlab("Candidate") + theme(legend.position="none") + ylab("Number of Respondents") + ggtitle("                                         2016 Presidential Election Vote Choice")
@@ -84,6 +96,14 @@ ggplot(vote, aes(x=reorder(votechoice, -total.count), y=total.count)) + geom_col
 We asked respondents who they chose to vote for in the 2016 presidential campaigns. 41% chose Hillary Clinton as their candidate while 30% chose Trump, however nearly as many clergy (29%) chose something else, whether it be not voting or casting a ballot for a third party candidate.
 
 We followed up by asking what was the most important factor in deciding who they were going to vote for in the election. The most popular response items were: temperament, judicial appointments, and abortion. 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+p1 <- ggplot(abc, aes(hrcshare)) + geom_bar( fill="blue", colour="black")  + geom_vline(xintercept = mean(abc$hrcshare, na.rm = TRUE), linetype = "longdash") + xlab("Clinton's Vote Share") + ylab("Number of Churches")
+p2 <- ggplot(abc, aes(djtshare)) + geom_bar( fill="red", colour="black")  + geom_vline(xintercept = mean(abc$djtshare, na.rm = TRUE), linetype = "longdash") + xlab("Trump's Vote Share") + ylab("Number of Churches")
+grid.arrange(p1, p2, ncol=1, top=textGrob("Please Estimate the Proportion of Adults that Supports the Two Major Party Candidates.", gp=gpar(fontsize=15, font=6)))
+```
+
+We asked clergy to guess how their church would vote in the 2016 presidential election. 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 ggplot(abc %>% filter(q66_1 >0), aes(q66_1)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
@@ -112,6 +132,20 @@ ggplot(abc %>% filter(q66_5 >0), aes(q66_5)) + geom_bar(aes(y = ((..count..)/sum
 ```
 
 We also asked clergy if they think that relationship between evangelicalism and the Republican Party is a healthy one. The clergy responded to this question with an ovewhelmingly negative attitude. Just 8% of the total sample agreed that the relationship was a positive one. Over 80% of Hillary Clinton supporters had a negative view of the link between evangelicalism and Republican politics. 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+abc$trust[abc$trust == 8] <- NA
+abc$trust[abc$trust==1] <- "Distrust Greatly"
+abc$trust[abc$trust==2] <- "Distrust"
+abc$trust[abc$trust==5] <- "Distrust Somewhat"
+abc$trust[abc$trust==3] <- "Neither"
+abc$trust[abc$trust==4] <- "Trust Somewhat"
+abc$trust[abc$trust==6] <- "Trust"
+abc$trust[abc$trust==7] <- "Trust Greatly"
+ggplot(na.omit(abc), aes(trust)) + geom_bar() + xlab("Trust in Government") + ylab("Number of Respondents")
+```
+
+We asked clergy, "How much do you trust the federal government to do what's right?" The answers were predicably pessimistic with 70% saying that they have a distrustful opinion of the government. There was a considerable difference on the question with regards to political affiliation. One quarter of Clinton voters had some trust in government, while just one Trump voter had trust in governmen to do the right thing.
 
 ## Clergy Political Activity
 
@@ -153,21 +187,18 @@ This is also evident in another set of questions where we asked clergy which pol
 
 ## Clergy Theology
 
+We presented clergy a series of six statements to assess their religious theology. For each statement, respondents were offered response options ranging from "Strongly Disagree" to "Strongly Agree." The most interesting way to look at this analysis is by dividing the sample up into those who would vote for Clinton and those who would vote for Trump. 
+
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-library(Rmisc)
-library(tibble)
-testCI <- CI(abc$relcon1)
-testCI2 <- CI(abc$relcon2)
-testCI3 <- CI(abc$relcon3)
-testCI4 <- CI(abc$relcon4)
-testCI5 <- CI(abc$relcon5)
-testCI6 <- CI(abc$relcon6)
-cidf <- rbind(testCI, testCI2, testCI3, testCI4, testCI5, testCI6)
-cidf <- as_tibble(cidf)
-cidf$factor <- c("Devil Exists", "Literal Bible", "Jesus Bodily Return", "Virgin Birth" , "Absolute Truth", "Male Authority")
-limits <- aes(ymax = cidf$upper, ymin= cidf$lower)
-ggplot(cidf, aes(x=reorder(factor, mean), y=mean)) + geom_point() + coord_flip() + geom_errorbar(limits, width=0.15 ) + xlab("Theology Statements") + ylab("Higher Values = More Conservative")
+dotplot <- read.csv("dotplot.csv")
+ggplot(dotplot, aes(x = mean, y = question))  +
+geom_point(color = "black", shape=21, size =4, aes(fill = factor(label))) +  theme(legend.title=element_blank()) +
+theme(legend.position = "bottom") +xlab("Higher Values = More Conservative") + ylab("Theology Question") + xlim(1,5)  +   scale_fill_manual(values=c("blue", "red"))
+
+
 ```
+
+As is apparent, there is a tremendous difference between the theology of these two groups. In all six cases, Clinton voters are more liberal on theological issues. The largest gaps appear on statements regarding biblical literalism and male authority. It's clear that political liberalism is also related to religious liberalism among ABCUSA clergy. But how do ABC clergy see themselves? 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 labels <- abc %>% summarise(evangelical = sum(q42_1), fundie = sum(q42_2), liberal = sum(q42_3), orthodox = sum(q42_4), ecumenical = sum(q42_5), pentecostal = sum(q42_6), conservative = sum(q42_7), emergent = sum(q42_8))
@@ -175,3 +206,5 @@ labels <- as.data.frame(t(labels))
 labels$type <- c("Evangelical", "Fundamentalist", "Liberal", "Orthodox", "Ecumenical", "Pentecostal", "Conservative", "Emergent")
 ggplot(labels, aes(x=reorder(type, V1), y= V1)) + geom_col() + coord_flip() + xlab("Religious Label") + ylab("Number of Respondents")
 ```
+
+In one section of the survey we asked respondents to check boxes next to terms that they believed described them. As the graph below indicates, over half of the sample identified as emergent. The other labels do not seem to resonate as much as about half as many chose ecumenical. It's interesting to note that 38 clergy were comfortable with the "conservative" label and 32 identified as "liberal." 
