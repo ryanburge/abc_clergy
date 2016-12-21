@@ -281,7 +281,9 @@ abc$relcon5 <- recode(abc$relcon5, "6=0")
 abc$relcon6 <- recode(abc$relcon6, "6=0")
 
 abc$relcon <- abc$relcon1 + abc$relcon2 + abc$relcon3 + abc$relcon4 + abc$relcon5 + abc$relcon6
-abc$relcon <- abc$relcon/30
+abc$relcon <- abc$relcon/6
+abc$relcon[abc$relcon == 0] <- NA
+
 
 ## Years of Service
 abc <- read.csv("abc.csv")
