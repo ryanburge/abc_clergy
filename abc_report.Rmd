@@ -1,8 +1,11 @@
 ---
 title: "ABC Clergy Survey"
-author: "Ryan Burge"
-date: "December 17, 2016"
-output: html_document
+author: "Dr. Ryan Burge and Dr. Paul Djupe"
+date: "December 20, 2016"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
 ---
 
 ## Introduction
@@ -19,10 +22,14 @@ library(ggplot2)
 library(RColorBrewer)
 library(gridExtra)
 library(grid)
+library(extrafont)
+library(extrafontdb)
 abc <- read.csv("abc_final.csv", stringsAsFactors = FALSE)
+clinton <- filter(abc, votechoice == "Clinton")
+trump <- filter(abc, votechoice == "Trump")
 abc$educ <- factor(abc$q48)
 abc$educ <- ordered(abc$educ, levels = c(3,4,5,6), labels = c("Some College", "College Degree", "Graduate Work", "Doctoral Degree"))
-ggplot(na.omit(abc), aes(educ)) + geom_bar() + ggtitle("                                            Education Level") + xlab("Highest Degree Achieved") + ylab("Number of Respondents")
+ggplot(na.omit(abc), aes(educ)) + geom_bar(fill = "darkcyan", color = "black") + ggtitle("                                            Education Level") + xlab("Highest Degree Achieved") + ylab("Number of Respondents")
 ```
 
 The sample that we collected was highly educated. Which nearly 80% of the sample having completed at least some coursework at the graduate level. It seems highly doubtful that this trend will remain consistent across the entire denomination. 
@@ -34,13 +41,13 @@ In regard to age, responses ranged from 29 years old to 85 years old with the me
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 abc$attendance <- as.numeric(abc$attendance)
-qplot(attendance, data=abc, geom="histogram", bins = 45,  fill = "red") + xlab("Average Weekly Attendance") + theme(legend.position="none") + ylab("Number of Churches") + ggtitle("                                                Average Attendance")
+ggplot(abc %>% filter(attendance>0), aes(attendance)) +  geom_bar() + theme(axis.text.x = element_text(angle = 90)) + stat_bin(bins =75) + xlab("Average Weekly Attendance") + theme(legend.position="none") + ylab("Number of Churches") 
 ```
 
 The average attendance figures comport much closer to statistics that are commonly used when discussing church attendance. The median attendance reported was 85, however there were a number of churches in the sample with larger attendance up to 550 individuals. A finding worth noting is that there was no statistical relationship in the data between the age of the clergy and the size of their congregation or the amount of education of the resopndent and their education level. 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-ggplot(abc %>% filter(grow >0), aes(grow, fill = "blue")) + geom_bar() + xlab("How has attendance changed in the last 12 months?") + theme(legend.position="none") + ylab("Number of Responses") + ggtitle("                                                     Church Growth")
+ggplot(abc %>% filter(grow >0), aes(grow)) + geom_bar(fill = "darkcyan", color = "black") + xlab("How has attendance changed in the last 12 months?") + theme(legend.position="none") + ylab("Number of Responses") + ggtitle("                                                     Church Growth")
 ```
 
 Many of the churches in the sample were not experiencing what the rest of the ABCUSA has been undergoing: a significant decline in members. In fact, only 18% of the clergy surveyed their church had declined in size in the last year and 34% saw an increase in average attendance. Almost half the sample saw no change. Over three quarters of pastors said that they didn't feel competition from other churches for members. 
@@ -61,7 +68,7 @@ abc$outmail <- abc$out4 + abc$out8 + abc$out12
 outreach <- abc %>% summarise(sum_event = sum(outevent), sum_worship = sum(outworship), sum_comm = sum(outcomm), sum_mail = sum(outmail))
 outreach <- as.data.frame(t(outreach))
 outreach$type <- c("Outreach Event", "Changed Worship", "Outreach Committee", "Mailed Flyers") 
-ggplot(outreach, aes(x=type, y= V1)) + geom_col() + coord_flip() + xlab("Type of Activity") + ylab("Number of Respondents")
+ggplot(outreach, aes(x=type, y= V1)) + geom_col(fill = "darkcyan", color = "black") + coord_flip() + xlab("Type of Activity") + ylab("Number of Respondents")
 ```
 
 The results indicated that churches are attempting outreach activities. Two thirds of respondents said that their church had held an outreach event and nearly half the sample indicating that they had made changes to their style of worship to be more attractive to potential new members. 
@@ -71,7 +78,7 @@ The results indicated that churches are attempting outreach activities. Two thir
 We asked pastors a series of three questions regarding how much involvement the ABCUSA should have on social and political issues, fostering debate about these issues inside the religious body, and lobbying the government in regard to these issues. These three questions were combined into an index with 0 indicating less involvement and 1 indicating more involvement. 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-ggplot(abc %>% filter(involve >0), aes(involve)) + geom_bar() + xlab("ABC Involvement Score") + theme(legend.position="none") + ylab("Number of Respondents") + ggtitle("                                          How involved should the ABC be?")
+ggplot(abc %>% filter(involve >0), aes(involve)) + geom_bar(fill = "darkcyan", color = "black") + xlab("ABC Involvement Score") + theme(legend.position="none") + ylab("Number of Respondents") + ggtitle("                                          How involved should the ABC be?")
 ```
 
 This data seems to indicate that pastors want to see a more active denominational leadership. The mean score was .61 for the entire sample. However, what is worth noting is when this ABC involvement scale is considered in light of which political candidate the respondent was going to cast their ballot for in the presidential election. The mean score for clinton voters was .74, but the mean score for Trump voters was .51 with Gary Johnson voters splitting the difference at .67. 
@@ -90,35 +97,45 @@ In regard to general party affiliation, the sample leans slight to the right. Th
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 vote <- abc %>% group_by(votechoice) %>%  summarise(total.count= n()) %>%  arrange(desc(total.count))
 vote <- vote[-c(3),]
-ggplot(vote, aes(x=reorder(votechoice, -total.count), y=total.count)) + geom_col() + xlab("Candidate") + theme(legend.position="none") + ylab("Number of Respondents") + ggtitle("                                         2016 Presidential Election Vote Choice")
+colors <- c("blue","red", "grey", "grey", "yellow", "green")
+ggplot(vote, aes(x=reorder(votechoice, -total.count), y=total.count)) + geom_col(fill = colors) + xlab("Candidate") + theme(legend.position="none") + ylab("Number of Respondents") + ggtitle("                                   2016 Presidential Election Vote Choice") 
 ```
 
 We asked respondents who they chose to vote for in the 2016 presidential campaigns. 41% chose Hillary Clinton as their candidate while 30% chose Trump, however nearly as many clergy (29%) chose something else, whether it be not voting or casting a ballot for a third party candidate.
 
 We followed up by asking what was the most important factor in deciding who they were going to vote for in the election. The most popular response items were: temperament, judicial appointments, and abortion. 
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r message=FALSE, warning=FALSE, echo = FALSE,  fig.width=12}
+abc$djtshare <- abc$q22_1
+abc$hrcshare <- abc$q22_2
+abc$hrcshare[abc$hrcshare == 0] <- NA
+abc$djtshare[abc$djtshare == 0] <- NA
 p1 <- ggplot(abc, aes(hrcshare)) + geom_bar( fill="blue", colour="black")  + geom_vline(xintercept = mean(abc$hrcshare, na.rm = TRUE), linetype = "longdash") + xlab("Clinton's Vote Share") + ylab("Number of Churches")
 p2 <- ggplot(abc, aes(djtshare)) + geom_bar( fill="red", colour="black")  + geom_vline(xintercept = mean(abc$djtshare, na.rm = TRUE), linetype = "longdash") + xlab("Trump's Vote Share") + ylab("Number of Churches")
 grid.arrange(p1, p2, ncol=1, top=textGrob("Please Estimate the Proportion of Adults that Supports the Two Major Party Candidates.", gp=gpar(fontsize=15, font=6)))
 ```
 
-We asked clergy to guess how their church would vote in the 2016 presidential election. 
+We asked clergy to guess how their church would vote in the 2016 presidential election. The vertical dashed lines indicate the mean guess for each of the two candidates. The average vote share for Clinton was 52.2% and the average vote for Trump was 43%. What is worth reflection is that pastors who said that they would personally vote for Trump are more likely to perceive that their congregations would vote for Trump, in fact Trump voting clergy believe that, on average 67% of their congregations are Trump supporters as well. The same pattern is true for Clinton supporting clergy, who speculate that 68% of their congregation are like them politically. It seems that Democrat clergy lead Democrat congregation, and the same is true for Republican pastors.  
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-ggplot(abc %>% filter(q66_1 >0), aes(q66_1)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
-  scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) + 
-  ggtitle("                        Public support for Donald Trump will hurt Christian witness ") + 
-  ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90))
+```{r message=FALSE, warning=FALSE, echo = FALSE,  fig.width=12}
+t1<- ggplot(trump %>% filter(q66_1 >0), aes(q66_1)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
+scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) +
+ggtitle("                                       Trump Voters Only ") +
+ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90))
+c1 <- ggplot(clinton %>% filter(q66_1 >0), aes(q66_1)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="blue", colour="black")+
+scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) +
+ggtitle("                                       Clinton Voters Only ") +
+ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90)) 
+grid.arrange(c1, t1, ncol=2, top=textGrob("                  Public support for Donald Trump will hurt Christian witness", gp=gpar(fontsize=15, font=6)))
 ```
 
-We presented respondents with a number of statements about the presidential election and then asked them to respond on a scale from "strong agree" to "strongly disagree." A significant portion of the sample expressed serious reservations about the impact Donald Trump is going to have on Christian witness going forward. What is more fascinating is that one third of clergy who say that they are going to vote for Trump also agree that support for him will hurt Christian witness and 30% "neither agree or disagree" with the statement.
+We presented respondents with a number of statements about the presidential election and then asked them to respond on a scale from "strong agree" to "strongly disagree." A significant portion of the sample expressed serious reservations about the impact Donald Trump is going to have on Christian witness going forward. What is more fascinating is that one third of clergy who say that they are going to vote for Trump also agree that support for him will hurt Christian witness and 30% "neither agree or disagree" with the statement. It would appear that there were serious reservations about Trump even among his supporters, however that did not sway many of their votes. 
 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 ggplot(abc %>% filter(q66_2 >0), aes(q66_2)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
   scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) + 
-  ggtitle("           Moving a conservative agenda is worth any price of supporting Trump ") + 
+  ggtitle("   Moving a conservative agenda is worth any price of supporting Trump ") + 
   ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90))
 ```
 
@@ -127,22 +144,15 @@ There was overwhelming disagreement with the statement: "Moving a conservative a
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 ggplot(abc %>% filter(q66_5 >0), aes(q66_5)) + geom_bar(aes(y = ((..count..)/sum(..count..))*100),  fill="red", colour="black")+
   scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Strongly Agree", "Agree", "Somewhat Agree", "Neither Agree or Disagree", "Somewhat Disagree", "Disagree", "Strongly Disagree")) + 
-  ggtitle(" The bond between evangelicals and the Republican Party is a healthy lasting one.  ") + 
+  ggtitle("The bond between evangelicals and the Rep. Party is a healthy lasting one.  ") + 
   ylab("Percent of Sample") + theme(axis.title.x=element_blank())  + theme(axis.text.x = element_text(angle = 90))
 ```
 
 We also asked clergy if they think that relationship between evangelicalism and the Republican Party is a healthy one. The clergy responded to this question with an ovewhelmingly negative attitude. Just 8% of the total sample agreed that the relationship was a positive one. Over 80% of Hillary Clinton supporters had a negative view of the link between evangelicalism and Republican politics. 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-abc$trust[abc$trust == 8] <- NA
-abc$trust[abc$trust==1] <- "Distrust Greatly"
-abc$trust[abc$trust==2] <- "Distrust"
-abc$trust[abc$trust==5] <- "Distrust Somewhat"
-abc$trust[abc$trust==3] <- "Neither"
-abc$trust[abc$trust==4] <- "Trust Somewhat"
-abc$trust[abc$trust==6] <- "Trust"
-abc$trust[abc$trust==7] <- "Trust Greatly"
-ggplot(na.omit(abc), aes(trust)) + geom_bar() + xlab("Trust in Government") + ylab("Number of Respondents")
+ggplot(abc %>% filter(trust <8), aes(trust)) + geom_bar(fill = "darkcyan", color = "black") + xlab("Trust in Government") + ylab("Number of Respondents") + xlim(.5,7.25) +
+    scale_x_continuous(breaks = c(1,2,3,4,5,6,7), labels = c("Distrust Greatly", "Distrust", "Distrust Somewhat", "Neither", "Trust Somewhat", "Trust", "Trust Greatly")) + theme(axis.text.x = element_text(angle = 90))
 ```
 
 We asked clergy, "How much do you trust the federal government to do what's right?" The answers were predicably pessimistic with 70% saying that they have a distrustful opinion of the government. There was a considerable difference on the question with regards to political affiliation. One quarter of Clinton voters had some trust in government, while just one Trump voter had trust in governmen to do the right thing.
@@ -158,13 +168,23 @@ abc$petition <- abc$state5 + abc$state11 + abc$state17
 abc$letter <- abc$state6 + abc$state12 + abc$state18
 action <- abc %>% summarise(sum_sign = sum(sign), sum_bumper = sum(bumper), sum_demonstrate = sum(demonstrate), sum_button = sum(button), sum_petition = sum(petition), sum_letter = sum(letter))
 final_action <- as.data.frame(t(action))
-final_action$type <- c("Sign a Petition", "Bumper Sticker", "Demonstration", "Wear a Button", "Sign a Petition", "Letter to Rep")
-ggplot(final_action, aes(x=reorder(type, V1), y= V1)) + geom_col() + coord_flip() + xlab("Type of Political Act") + ylab("Number of Respondents")
+final_action$type <- c("Yard Sign", "Bumper Sticker", "Demonstration", "Wear a Button", "Sign a Petition", "Letter to Rep")
+ggplot(final_action, aes(x=reorder(type, V1), y= V1)) + geom_col(fill = "darkcyan", color = "black") + coord_flip() + xlab("Type of Political Act") + ylab("Number of Respondents")
 ```
 
-We wanted to get a handle on how willing clergy were to engage in political activities. We asked if they would be willing to wear a political button, put a bumper sticker on their car, participate in a demonstration, sign a petition that would appear in the local newspaper, or write a letter to their U.S. representative. 
+We wanted to get a handle on how willing clergy were to engage in political activities. We asked if they would be willing to wear a political button, put a bumper sticker on their car, put a political sign in their yard, participate in a demonstration, sign a petition that would appear in the local newspaper, or write a letter to their U.S. representative. 
 
-It seems that clergy are much more willing to take a less visible action than one that has higher visibility. For example, wearing a button in public and putting a bumper sticker on their car were activities not frequently engaged in, while signing a petition and writing a letter were much more pervasive. 
+It seems that clergy are much more willing to take a less visible action than one that has higher visibility. For example, wearing a button in public, placing a sign in their yard, and putting a bumper sticker on their car were activities not frequently engaged in, while signing a petition and writing a letter were much more pervasive. 
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+rep <- abc %>% summarise(rep1 = sum(rep1), rep2 = sum(rep2), rep3 = sum(rep3), rep4 = sum(rep4), rep5 = sum(rep5))
+final_rep <- as.data.frame(t(rep))
+final_rep$type <- c("Cong. Contact Me w/Political Concerns", "I Contacted Govt. for Congregation", "I Consider Myself a Rep.", "The Cong. Considers Me a Rep.", "I Know Govt. Officials")
+ggplot(final_rep, aes(x=reorder(type, V1), y= V1)) + geom_col(fill = "darkcyan", color = "black") + coord_flip() + xlab("Type of Political Representation") + ylab("Number of Respondents")
+```
+
+We were also interested in how clergy saw themselves and how they perceived the congregation perceived their role as political representatives. Over two thirds of the clergy had been contacted by their membership regarding political issues. However, only about a quarter of the respondents said that they had passed those concerns on to a government official. It it noteworthy that slightly more pastors feel that they are a political representative than perceives that their congregation sees them as a representative. 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 abc$vote <- abc$q5_1 + abc$q10_1 + abc$q13_1
@@ -180,7 +200,7 @@ abc$register <- abc$q5_10 + abc$q10_10 + abc$q13_10
 polact <- abc %>% summarise(sum_vote = sum(vote), sum_contact = sum(contact), sum_donate = sum(donate), sum_vol1 = sum(vol1), sum_volig = sum(volig), sum_urge = sum(urge), sum_protest = sum(protest), sum_rally= sum(rally), sum_study= sum(study), sum_register= sum(register))
 polact <- as.data.frame(t(polact))
 polact$type <- c("Voted", "Contacted Rep.", "Donated Money", "Campaign Volunteer", "Interest Group Volunteer", "Encouraged Cong. to Vote", "Protested", "Attended a Rally", "Started a Political Study Group", "Registration Drive in Church")
-ggplot(polact, aes(x=reorder(type, V1), y= V1)) + geom_col() + coord_flip() + xlab("Type of Political Act") + ylab("Number of Respondents")
+ggplot(polact, aes(x=reorder(type, V1), y= V1)) + geom_col(fill = "darkcyan", color = "black")+ coord_flip() + xlab("Type of Political Act") + ylab("Number of Respondents")
 ```
 
 This is also evident in another set of questions where we asked clergy which political activities that they have engaged in. The most popular action was voting, followed by encouraging their congregation to vote. 
@@ -193,7 +213,7 @@ We presented clergy a series of six statements to assess their religious theolog
 dotplot <- read.csv("dotplot.csv")
 ggplot(dotplot, aes(x = mean, y = question))  +
 geom_point(color = "black", shape=21, size =4, aes(fill = factor(label))) +  theme(legend.title=element_blank()) +
-theme(legend.position = "bottom") +xlab("Higher Values = More Conservative") + ylab("Theology Question") + xlim(1,5)  +   scale_fill_manual(values=c("blue", "red"))
+theme(legend.position = "bottom") +xlab("Higher Values = More Conservative") + ylab("Theology Question") + xlim(1,5.5)  +   scale_fill_manual(values=c("blue", "red")) + scale_x_continuous(breaks = c(1,2,3,4,5), labels = c("SD", "D", "Neither", "A", "SA")) 
 
 
 ```
@@ -204,7 +224,26 @@ As is apparent, there is a tremendous difference between the theology of these t
 labels <- abc %>% summarise(evangelical = sum(q42_1), fundie = sum(q42_2), liberal = sum(q42_3), orthodox = sum(q42_4), ecumenical = sum(q42_5), pentecostal = sum(q42_6), conservative = sum(q42_7), emergent = sum(q42_8))
 labels <- as.data.frame(t(labels))
 labels$type <- c("Evangelical", "Fundamentalist", "Liberal", "Orthodox", "Ecumenical", "Pentecostal", "Conservative", "Emergent")
-ggplot(labels, aes(x=reorder(type, V1), y= V1)) + geom_col() + coord_flip() + xlab("Religious Label") + ylab("Number of Respondents")
+ggplot(labels, aes(x=reorder(type, V1), y= V1)) + geom_col(fill = "darkcyan", color = "black") + coord_flip() + xlab("Religious Label") + ylab("Number of Respondents")
 ```
 
 In one section of the survey we asked respondents to check boxes next to terms that they believed described them. As the graph below indicates, over half of the sample identified as emergent. The other labels do not seem to resonate as much as about half as many chose ecumenical. It's interesting to note that 38 clergy were comfortable with the "conservative" label and 32 identified as "liberal." 
+
+## Concluding Thoughts
+
+The ABCUSA clergy seem to be fairly divided. While this sample size is small, the results are clear. There are clear divisions between conservative clergy and liberal clergy on both political issues as well as theological issues. It's apparent that clergy do a good job of "sorting themselves out," however. These results indicate that conservative clergy are shepherding conservative congregations and the same is true for liberal clergy. How this process plays out in reality would be an interesting process to investigate. 
+
+When it comes to questions regarding how the ABCUSA should use this data, it seems that if a pastor was a liberal then they desire for a denomination that is more active politically and socially. Conservative pastors are less convinced that an engaged denomination is the best course of action. 
+
+Again, we must caution a reader about interpreting these results in a broad manner. These results describe the sample that we received, which as noted above is a highly educated group from a very small number of churches. 
+
+## Contact Information
+
+If you like to discuss this data further feel free to contact Dr. Ryan Burge (<rpburge@eiu.edu>) or Dr. Paul Djupe (<djupe@denison.edu>). 
+
+Dr. Burge's work is available on [his personal website](www.ryanburge.net)
+
+Dr. Djupe's work is available on [his personal website](http://pauldjupe.com/)
+
+All the data and coding for this project are available on [GitHub](https://github.com/ryanburge/abc_clergy)
+
