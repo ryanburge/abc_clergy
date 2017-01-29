@@ -3,15 +3,15 @@ title: "ABC Clergy Survey"
 author: "Dr. Ryan Burge and Dr. Paul Djupe"
 date: "December 20, 2016"
 output:
-  pdf_document: default
   html_document:
     css: style.css
+  pdf_document: default
   word_document: default
 ---
 
 ## Introduction
 
-In the fall of 2016, Dr. Ryan Burge and Dr. Paul Djupe administered an online survey in clergy from the American Baptist Churches of the USA denomination. This survey was open from October 25th until November 7th. The opportunity to take the survey was offered through an email correspondence and the Qualtrics survey platform was used to pose the questions and record the results. In total 1314 emails were sent, but 289 bounced back. The total number of clergy who began the survey was 246, however there was a significant amount of roll-off - there were some questions where the number of respondents dropped to 168.
+In the fall of 2016, Dr. Ryan Burge and Dr. Paul Djupe administered an online survey of clergy from the American Baptist Churches of the USA denomination. This survey was open from October 25th until November 7th. The opportunity to take the survey was offered through an email correspondence and the Qualtrics survey platform was used to pose the questions and record the results. In total 1314 emails were sent, but 289 bounced back. The total number of clergy who began the survey was 246, however there was a significant amount of roll-off - there were some questions where the number of respondents dropped to 168.
 
 A disclaimer must be attached to these results. This survey is not necessarily a representative sample of the clergy of the ABCUSA. This is for two primary reasons: sample size and the way that this survey was conducted. According to Wikipedia, the ABCUSA has 5,402 congregations. We received responses from less than 3% of all the pastors in the denomination. It's likely that if another random sample of 200 pastors answered this survey the answers would be different. The second reason is that this sample is not random, but a collection of all congregations for which we could connect an email address. Small congregations are typically less technologically advanced and therefore don't have an email address publicly available. The pastors that we sampled are highly educated and pastor churches that have an average attendance that is much higher than what one would assume. This is displayed below
 
