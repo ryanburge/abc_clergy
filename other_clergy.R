@@ -46,7 +46,7 @@ theo1 <- ggplot(theodata, aes(x = value, y = variable))  +
   geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) +  theme(legend.title=element_blank()) +
   theme(legend.position = "bottom") +xlab("Higher Values = More Conservative") + ylab("Theology Question") + xlim(1,5.5)  +
   scale_x_continuous(breaks = c(1,2,3,4,5), labels = c("SD", "D", "Neither", "A", "SA")) +  
-  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "#F781BF")) + 
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "seagreen1")) + 
   theme(text=element_text(size=18, family="KerkisSans"))
 
 ## This is the dataset with ABCUSA as 2 groups
@@ -78,7 +78,7 @@ ggplot(pid, aes(x=pid, y =label)) + geom_point(color = "black", shape=21, size =
   theme(legend.title=element_blank()) +
   theme(legend.position = "bottom") +
   scale_x_continuous(limits = c(1,7), breaks = c(1,2,3,4,5,6,7), labels = c("Strong Dem.", "Dem.", "Lean Dem.", "Independent", "Lean Rep.", "Rep.", "Strong. Rep")) +  
-  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "#F781BF")) + 
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "seagreen1")) + 
   theme(text=element_text(size=18, family="KerkisSans")) + xlab("") + ylab("")
 
 
@@ -92,7 +92,8 @@ sbcplot$time <- factor(sbcplot$time, levels=unique(sbcplot$time))
 ggplot(data=sbcplot, aes(x=time, y=total_bill, fill=time)) + geom_bar(stat="identity") + 
   scale_fill_brewer(palette="RdBu", direction=-1) +
   theme(legend.position="none") + xlab("Party Identification") + ylab("Number of Respondents") + 
-  theme(text=element_text(size=18, family="KerkisSans")) + ggtitle("                        Southern Baptist Clergy Party Identification")
+  theme(text=element_text(size=18, family="KerkisSans")) + ggtitle("Southern Baptist Clergy Party Identification")  +
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 ## Plotting ABC Party IDs
 
@@ -101,7 +102,8 @@ abc$partyid <- factor(abc$q39, levels = c(1,2,3,4,5,6,7),labels = c("Strong Dem.
 ggplot(na.omit(abc), aes(x= partyid, fill=factor(partyid)), color= factor(partyid)) + geom_bar() + 
   theme(axis.text.x = element_text(angle = 90)) + scale_fill_brewer(palette="RdBu", direction=-1) + 
   theme(legend.position="none") + xlab("Party Identification") + ylab("Number of Respondents") + 
-  theme(text=element_text(size=18, family="KerkisSans")) + ggtitle("                        American Baptist Clergy Party Identification")
+  theme(text=element_text(size=18, family="KerkisSans")) + ggtitle("American Baptist Clergy Party Identification") +
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 
 ## Scatter Plotting
@@ -115,12 +117,13 @@ df <- filter(df, denom != "Brethren")
 ggplot(df, aes(repubid, relcon)) + 
   geom_point(size =2 ,position=position_jitter(width=.5,height=.5), aes(colour = factor(denom))) +
   theme(legend.title=element_blank()) +
-  theme(legend.position = "bottom") + xlab("") +
+  theme(legend.position = "bottom") + xlab("Political Ideology") +
   scale_x_continuous(limits = c(1,7), breaks = c(1,2,3,4,5,6,7), labels = c("Strong Dem.", "Dem.", "Lean Dem.", "Independent", "Lean Rep.", "Rep.", "Strong. Rep")) +  
   ylab("Religious Conservatism") + 
-  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "#F781BF" ))  + 
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "seagreen1" ))  + 
   geom_smooth() + 
-  theme(text=element_text(size=18, family="KerkisSans"))
+  theme(text=element_text(size=18, family="KerkisSans")) + ggtitle("How are Ideology and Theology Related?") +
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 ## Political Activity By Clergy 
 pact <- clergy %>% group_by(denom) %>% summarise(sum_vote = sum(q43_1, na.rm = TRUE), sum_contact = sum(q43_2, na.rm = TRUE), sum_donate = sum(q43_3, na.rm = TRUE), sum_vol1 = sum(q43_4, na.rm = TRUE), sum_volig = sum(q43_5, na.rm = TRUE), sum_urge = sum(q43_6, na.rm = TRUE), sum_protest = sum(q43_7, na.rm = TRUE), sum_rally= sum(q43_8, na.rm = TRUE), sum_study= sum(q43_9, na.rm = TRUE), sum_register= sum(q43_10, na.rm = TRUE))
@@ -149,7 +152,7 @@ melt_pct <- melt(ppct, id="denom")
 
 ggplot(melt_pct, aes(x=reorder(variable, value), y=value*100, group = denom)) + geom_bar(aes(fill=denom),stat="identity", position= "dodge")  + 
   ggtitle("Political Activities by Denomination") +
-  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "#F781BF" )) +
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "seagreen1" )) +
   xlab("Political Act") + ylab("Percentage of Clergy") + 
   theme(legend.title=element_blank()) + 
   theme(text=element_text(size=16, family="KerkisSans")) + coord_flip() +
@@ -182,5 +185,83 @@ ggplot(involve, aes(x=value, y =label)) + geom_point(color = "black", shape=21, 
   theme(legend.title=element_blank()) +
   theme(legend.position = "bottom")  +  
   xlim(.25,.75) +
-  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#F781BF")) + 
-  theme(text=element_text(size=18, family="KerkisSans")) + xlab("How Involved Should Your Denomination Be?") + ylab("")
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "seagreen1")) + 
+  theme(text=element_text(size=18, family="KerkisSans")) + xlab("How Involved Should Your Denomination Be?") + ylab("") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+df3 <- data.frame("ABC - DJT", .51)
+df4 <- data.frame("ABC - HRC", .74)
+names(df3)<-c("denom", "value")
+names(df4)<-c("denom", "value")
+
+involve <- clergy %>% group_by(denom) %>% summarise(value = mean(involve, na.rm =TRUE))
+
+involve2 <- rbind(df3, df4, involve)
+involve2 <- filter(involve2, denom !="Brethren")
+involve2 <- filter(involve2, denom != "UMC")
+
+involve2$label <- c("Involvement")
+
+ggplot(involve2, aes(x=value, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "bottom")  +  
+  xlim(.25,.75) +
+  scale_fill_brewer(palette = "Set1") + 
+  theme(text=element_text(size=18, family="KerkisSans")) + xlab("How Involved Should Your Denomination Be?") + ylab("") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+## RAV Coding
+
+abc$rav1 <- abc$q18_2
+abc$rav2 <- abc$q18_3
+abc$rav3 <- abc$q18_5
+abc$rav4 <- abc$q18_7
+abc$rav5 <- abc$q18_9
+abc$rav <- abc$rav1 + abc$rav2 + abc$rav3 + abc$rav4 + abc$rav5
+abc$rav <- abc$rav/5
+
+clergy$rav1 <- clergy$q26_2
+clergy$rav2 <- clergy$q26_3
+clergy$rav3 <- clergy$q26_5
+clergy$rav4 <- clergy$q26_7
+clergy$rav5 <- clergy$q26_9
+clergy$rav <- clergy$rav1 + clergy$rav2 + clergy$rav3 + clergy$rav4 + clergy$rav5
+clergy$rav <- clergy$rav/5
+
+
+## Plotting Single Scale of RAV
+rav <- clergy %>% group_by(denom) %>% summarise(rav = mean(rav, na.rm = TRUE))
+df5 <- data.frame("ABCUSA", 3.366146)
+names(df5)<-c("denom", "rav")
+rav <- rbind(rav, df5)
+rav$label <- c("Religious Authority")
+
+ggplot(rav, aes(x=rav, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
+  theme(legend.title=element_blank()) +
+  theme(legend.position = "bottom")  +  
+  xlim(2,5) +
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "seagreen1")) + 
+  theme(text=element_text(size=18, family="KerkisSans")) + xlab("Religious Authority Scale") + ylab("") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+## Plotting Each RAV Question
+
+rav1 <- clergy %>% group_by(denom) %>% summarise(stepout = mean(rav1, na.rm = TRUE), construct = mean(rav2, na.rm = TRUE), congmake = mean(rav3, na.rm = TRUE), postmodern = mean(rav4, na.rm = TRUE), manybible = mean(rav5, na.rm = TRUE))
+rav2 <- abc %>% group_by(denom) %>%   summarise(stepout = mean(rav1, na.rm = TRUE), construct = mean(rav2, na.rm = TRUE), congmake = mean(rav3, na.rm = TRUE), postmodern = mean(rav4, na.rm = TRUE), manybible = mean(rav5, na.rm = TRUE))
+rav3 <- rbind(rav1, rav2)
+
+rav3 <- filter(rav3, denom != "Brethren")
+
+names(rav3) <- c("denom", "Clergy Step Out of Way", "Cong. Construct Salvation", "Cong. Makes Gospel", "Adapt to Postmodern Culture", "Many Interpt. of Bible")
+
+
+melt_rav <- melt(rav3, id="denom")
+melt_rav$newval <- 5- melt_rav$value
+
+ggplot(melt_rav, aes(x = newval, y = variable))  +
+  geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) +  theme(legend.title=element_blank()) +
+  theme(legend.position = "bottom") +xlab("<- More Religious Authority : Less Religious Authority ->") + ylab("") + xlim(0,5.5)  +
+  scale_x_continuous(breaks = c(0,1,2,3,4), labels = c("SD", "D", "Neither", "A", "SA")) +  
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "seagreen1")) + 
+  theme(text=element_text(size=18, family="KerkisSans"))
+
