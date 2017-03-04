@@ -181,7 +181,7 @@ involve <- involve[-1,]
 involve <- involve[-5,]
 involve$label <- c("Involvement")
 
-ggplot(involve, aes(x=value, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
+dot1 <- ggplot(involve, aes(x=value, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
   theme(legend.title=element_blank()) +
   theme(legend.position = "bottom")  +  
   xlim(.25,.75) +
@@ -202,13 +202,15 @@ involve2 <- filter(involve2, denom != "UMC")
 
 involve2$label <- c("Involvement")
 
-ggplot(involve2, aes(x=value, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
+dot2 <- ggplot(involve2, aes(x=value, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
   theme(legend.title=element_blank()) +
   theme(legend.position = "bottom")  +  
   xlim(.25,.75) +
   scale_fill_brewer(palette = "Set1") + 
   theme(text=element_text(size=18, family="KerkisSans")) + xlab("How Involved Should Your Denomination Be?") + ylab("") +
   theme(plot.title = element_text(hjust = 0.5)) 
+
+grid.arrange(dot1, dot2, ncol =1)
 
 ## RAV Coding
 
