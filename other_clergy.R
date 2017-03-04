@@ -84,14 +84,24 @@ ggplot(pid, aes(x=pid, y =label)) + geom_point(color = "black", shape=21, size =
 
 ## Plotting SBC Party IDs
 
-sbcplot <- data.frame(time = factor(c("Strong Democrat", "Moderate Democrat", "Lean Democrat", "Independent","Lean Republican", "Moderate Republican", "Strong Republican"), levels=c("Strong Democrat", "Moderate Democrat", "Lean Democrat", "Independent","Lean Republican", "Moderate Republican", "Strong Republican")),
+sbcplot <- data.frame(time = factor(c("Strong Dem.", "Dem.", "Lean Dem.", "Independent", "Lean Rep.", "Rep.", "Strong. Rep")),
                  total_bill = c(1,1,1,0,11,13,10))
 
+sbcplot$time <- factor(sbcplot$time, levels=unique(sbcplot$time))
+
 ggplot(data=sbcplot, aes(x=time, y=total_bill, fill=time)) + geom_bar(stat="identity") + 
-  theme(axis.text.x = element_text(angle = 90)) + scale_fill_brewer(palette="RdBu", direction=-1) +
+  scale_fill_brewer(palette="RdBu", direction=-1) +
   theme(legend.position="none") + xlab("Party Identification") + ylab("Number of Respondents") + 
   theme(text=element_text(size=18, family="KerkisSans")) + ggtitle("                        Southern Baptist Clergy Party Identification")
 
+## Plotting ABC Party IDs
+
+abc$partyid <- factor(abc$q39, levels=unique(abc$q39))
+abc$partyid <- factor(abc$q39, levels = c(1,2,3,4,5,6,7),labels = c("Strong Dem.", "Dem.", "Lean Dem.", "Independent", "Lean Rep.", "Rep.", "Strong. Rep"))
+ggplot(na.omit(abc), aes(x= partyid, fill=factor(partyid)), color= factor(partyid)) + geom_bar() + 
+  theme(axis.text.x = element_text(angle = 90)) + scale_fill_brewer(palette="RdBu", direction=-1) + 
+  theme(legend.position="none") + xlab("Party Identification") + ylab("Number of Respondents") + 
+  theme(text=element_text(size=18, family="KerkisSans")) + ggtitle("                        American Baptist Clergy Party Identification")
 
 
 ## Scatter Plotting
@@ -99,7 +109,7 @@ ggplot(data=sbcplot, aes(x=time, y=total_bill, fill=time)) + geom_bar(stat="iden
 clergy$repubid[clergy$repubid==0] <- NA
 abc.s <- select(abc, repubid, relcon, denom)
 clergy.s <- select(clergy, repubid, relcon, denom)
-df <- rbind(abc.s, clergy.s)
+df <- rbind(clergy.s, abc.s)
 df <- filter(df, denom != "Brethren")
 
 ggplot(df, aes(repubid, relcon)) + 
@@ -107,11 +117,46 @@ ggplot(df, aes(repubid, relcon)) +
   theme(legend.title=element_blank()) +
   theme(legend.position = "bottom") + xlab("") +
   scale_x_continuous(limits = c(1,7), breaks = c(1,2,3,4,5,6,7), labels = c("Strong Dem.", "Dem.", "Lean Dem.", "Independent", "Lean Rep.", "Rep.", "Strong. Rep")) +  
-  ylab("Religious Conservatism") + scale_fill_brewer(palette = "Set1")  + geom_smooth() + 
+  ylab("Religious Conservatism") + 
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "#F781BF" ))  + 
+  geom_smooth() + 
   theme(text=element_text(size=18, family="KerkisSans"))
 
+## Political Activity By Clergy 
+pact <- clergy %>% group_by(denom) %>% summarise(sum_vote = sum(q43_1, na.rm = TRUE), sum_contact = sum(q43_2, na.rm = TRUE), sum_donate = sum(q43_3, na.rm = TRUE), sum_vol1 = sum(q43_4, na.rm = TRUE), sum_volig = sum(q43_5, na.rm = TRUE), sum_urge = sum(q43_6, na.rm = TRUE), sum_protest = sum(q43_7, na.rm = TRUE), sum_rally= sum(q43_8, na.rm = TRUE), sum_study= sum(q43_9, na.rm = TRUE), sum_register= sum(q43_10, na.rm = TRUE))
+pact <- filter(pact, denom != "Brethren")
+pact$total <- c(27, 218, 120, 55, 35)
+pact$pct_vote <- pact$sum_vote/pact$total
+pact$pct_contact <- pact$sum_contact/pact$total
+pact$pct_donate <- pact$sum_donate/pact$total
+pact$pct_vol1 <- pact$sum_vol1/pact$total
+pact$pct_volig <- pact$sum_volig/pact$total
+pact$pct_urge <- pact$sum_urge/pact$total
+pact$pct_protest <- pact$sum_protest/pact$total
+pact$pct_rally <- pact$sum_rally/pact$total
+pact$pct_study <- pact$sum_study/pact$total
+pact$pct_register <- pact$sum_register/pact$total
 
-## Involvement
+ppct <- select(pact, denom, pct_vote, pct_contact, pct_donate, pct_vol1, pct_volig, pct_urge, pct_protest, pct_rally, pct_study, pct_register)
+
+abcpct <- data.frame("ABCUSA", .669, .394, .160, .041, .077, .596, .119, .137, .022, .073)
+names(abcpct)<-c("denom", "pct_vote", "pct_contact", "pct_donate", "pct_vol1", "pct_volig", "pct_urge", "pct_protest", "pct_rally", "pct_study", "pct_register")
+ppct <- rbind(ppct, abcpct)
+
+names(ppct) <- c("denom", "Vote", "Contact Official", "Donate", "Campaign Vol.", "I.G. Vol.", "Encourage Vote", "Protested", "Attend Rally", "Pol. Study Group", "Regist. Drive")
+
+melt_pct <- melt(ppct, id="denom")
+
+ggplot(melt_pct, aes(x=reorder(variable, value), y=value*100, group = denom)) + geom_bar(aes(fill=denom),stat="identity", position= "dodge")  + 
+  ggtitle("Political Activities by Denomination") +
+  scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "#F781BF" )) +
+  xlab("Political Act") + ylab("Percentage of Clergy") + 
+  theme(legend.title=element_blank()) + 
+  theme(text=element_text(size=16, family="KerkisSans")) + coord_flip() +
+  theme(legend.position = "bottom")  +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+## Denominational Involvement
 
 clergy$involve1 <- 8 - clergy$q2_1
 clergy$involve2 <- 8 - clergy$q2_2
