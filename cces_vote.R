@@ -67,7 +67,6 @@ plot <- rbind(vote08, vote12, vote16)
 plot$candidate <- factor(plot$candidate, levels=unique(plot$candidate))
 
 
-plot.cor <- c(283, 547, 608)
 
 
 ggplot(plot, aes(1, weight, fill= fct_rev(candidate))) + geom_col()  + coord_flip() +  
@@ -81,7 +80,48 @@ theme(axis.title.y = element_blank()) +
   guides(fill = guide_legend(reverse = TRUE)) + labs(fill="")  + facet_grid(year ~ .) 
 
 
+cces16$bagain <- Recode(cces16$pew_bornagain, "1=1; else=2")
+cces12$bagain <- Recode(cces12$pew_bornagain, "1=1; else=2")
 
+cces16$bagain<-Recode(cces16$bagain,"1='Born Again or Evangelical';
+                    2='Not Born Again or Evangelical';
+                         else = NA")
+
+cces12$bagain<-Recode(cces12$bagain,"1='Born Again or Evangelical';
+                    2='Not Born Again or Evangelical';
+                         else = NA")
+
+cces08$bagain<-Recode(cces08$V215, "1='Born Again or Evangelical';
+                    2='Not Born Again or Evangelical';
+                         else = NA")
+
+
+
+ba16 <- cces16 %>%  filter(abc ==1) %>% 
+  count(bagain, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+ba12 <- cces12 %>%  filter(abc ==1) %>% 
+  count(bagain, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+ba08 <- cces08 %>%  filter(abc ==1) %>% 
+  count(bagain, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+
+
+baplot <- rbind(ba08, ba12, ba16)
+
+ggplot(baplot, aes(1, weight, fill= fct_rev(bagain))) + geom_col()  + coord_flip() +  
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.ticks = element_blank(), axis.text.y = element_blank()) + ylab("Percent of Votes Cast") + 
+  theme(legend.position="bottom") +
+  ggtitle("American Baptist Voters in Presidential Elections") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(text=element_text(size=18, family="KerkisSans")) + 
+  scale_fill_manual(values=c("black","goldenrod1" )) +  
+  guides(fill = guide_legend(reverse = TRUE)) + labs(fill="")  + facet_grid(year ~ .) 
 
 
 
