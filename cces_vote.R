@@ -3,63 +3,85 @@ library(dplyr)
 library(weights)
 library(forcats)
 library(extrafont)
+library(car)
 
-cces16 <- read_dta("C:/cces16.dta")
+cces16 <- read_dta("C:/Users/Ryan Burge/Desktop/cces.dta")
 
-abc <- filter(cces16, religpew_baptist ==2)
+cces12 <- read_dta("C:/Users/Ryan Burge/Desktop/cces12.dta")
 
-vote16 <- data.frame("candidate" = c("Donald Trump", "Hillary Clinton", "Gary Johnson", "Jill Stein"),
-                     pct =c(38.32, 57.9, 1.8, .5))
+cces08 <- read_dta("C:/Users/Ryan Burge/Desktop/cces2008.dta")
 
-vote16$candidate <- factor(vote16$candidate, levels = vote16$candidate)
+cces08$candidate <- Recode(cces08$CC327, "1= 'Republican';
+                                          2= 'Democrat';
+                                          3= 'Libertarian';
+                                          4= 'Green';
+                                          5= 'Libertarian';
+                                          6= 'Green';
+                                          7= 'Other';
+                                          8= 'Not Vote';
+                                          9= 'Not Sure'; else = NA")
 
 
-ggplot(vote16, aes(1, pct, fill= fct_rev(candidate))) + geom_col()  + coord_flip() +  
+
+cces12$candidate<-Recode(cces12$CC410a,"1='Democrat';
+                    2='Republican';
+                    3= 'Other';
+                    4= 'Not Vote';
+                    7= 'Not Sure';
+                    8= 'Skipped'; else = NA")
+
+
+
+cces16$candidate<-Recode(cces16$CC16_410a,"1='Republican';
+                    2='Democrat';
+                    3='Libertarian';
+                    4='Green';
+                    5= 'Other';
+                    6= 'Not Vote';
+                    7= 'Not Sure';
+                    8= 'Evan McMullin'; else = NA")
+
+cces08$abc <- Recode(cces08$V222, "2=1; else=0")
+
+vote08 <- cces08 %>%  filter(abc ==1 & complete.cases(candidate)) %>% 
+  count(candidate, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>%  arrange(desc(weight))
+
+
+cces12$abc <- Recode(cces12$religpew_baptist, "2=1; else=0")
+
+vote12 <- cces12 %>%  filter(abc ==1 & complete.cases(candidate)) %>% 
+  count(candidate, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>%  arrange(desc(weight))
+
+
+cces16$abc <- Recode(cces16$religpew_baptist, "2=1; else=0")
+
+vote16 <- cces16 %>%  filter(abc ==1 & complete.cases(candidate)) %>% 
+  count(candidate, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+plot <- rbind(vote08, vote12, vote16)
+
+
+plot$candidate <- factor(plot$candidate, levels=unique(plot$candidate))
+
+
+plot.cor <- c(283, 547, 608)
+
+
+ggplot(plot, aes(1, weight, fill= fct_rev(candidate))) + geom_col()  + coord_flip() +  
 theme(axis.title.y = element_blank()) + 
   theme(axis.ticks = element_blank(), axis.text.y = element_blank()) + ylab("Percent of Votes Cast") + 
   theme(legend.position="bottom") +
-  ggtitle("2016 Presidential Election") +
+  ggtitle("American Baptist Voters in Presidential Elections") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(text=element_text(size=18, family="KerkisSans")) + 
-  scale_fill_manual(values=c("forestgreen", "goldenrod1", "dodgerblue3", "firebrick1")) +  
-  guides(fill = guide_legend(reverse = TRUE)) + labs(fill="")  
+  scale_fill_manual(values=c("black","goldenrod1" , "forestgreen", "darkorchid4", "azure4",  "firebrick1", "dodgerblue3")) +  
+  guides(fill = guide_legend(reverse = TRUE)) + labs(fill="")  + facet_grid(year ~ .) 
 
 
-cces12 <- read_dta("C:/cces12.dta")
 
-abc12 <- filter(cces12, religpew_baptist ==2)
-
-vote12 <- data.frame("candidate" = c("Mitt Romney", "Barack Obama", "Other"), pct =c(37.6, 61.2, 1.2))
-
-ggplot(vote12, aes(1, pct, fill= fct_rev(candidate))) + geom_col()  + coord_flip() +  
-  theme(axis.title.y = element_blank()) + 
-  theme(axis.ticks = element_blank(), axis.text.y = element_blank()) + ylab("Percent of Votes Cast") + 
-  theme(legend.position="bottom") +
-  ggtitle("2012 Presidential Election") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(text=element_text(size=18, family="KerkisSans")) + 
-  scale_fill_manual(values=c("darkgrey", "firebrick1", "dodgerblue3")) +  
-  guides(fill = guide_legend(reverse = TRUE)) + labs(fill="") 
-
-
-cces08 <- read_dta("C:/cces2008.dta")
-
-abc08 <- filter(cces08, V222 == 2)
-
-wpct(abc08$CC327, abc08$V201)
-
-vote08 <- data.frame("candidate" = c("John McCain", "Barack Obama", "Ron Paul", "Other"), pct =c(29.2, 53.6, 1.3, 14.9))
-
-
-ggplot(vote08, aes(1, pct, fill= fct_rev(candidate))) + geom_col()  + coord_flip() +  
-  theme(axis.title.y = element_blank()) + 
-  theme(axis.ticks = element_blank(), axis.text.y = element_blank()) + ylab("Percent of Votes Cast") + 
-  theme(legend.position="bottom") +
-  ggtitle("2008 Presidential Election") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(text=element_text(size=18, family="KerkisSans")) + 
-  scale_fill_manual(values=c("goldenrod1", "darkgrey", "firebrick1", "dodgerblue3" )) +  
-  guides(fill = guide_legend(reverse = TRUE)) + labs(fill="") 
 
 
 
