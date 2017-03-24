@@ -42,6 +42,8 @@ cces16$candidate<-Recode(cces16$CC16_410a,"1='Republican';
                     8= 'Evan McMullin'; else = NA")
 
 cces08$abc <- Recode(cces08$V222, "2=1; else=0")
+cces08$sbc <- Recode(cces08$V222, "1=1; else=0")
+
 
 vote08 <- cces08 %>%  filter(abc ==1 & complete.cases(candidate)) %>% 
   count(candidate, wt = V201) %>% 
@@ -49,6 +51,7 @@ vote08 <- cces08 %>%  filter(abc ==1 & complete.cases(candidate)) %>%
 
 
 cces12$abc <- Recode(cces12$religpew_baptist, "2=1; else=0")
+cces12$sbc <- Recode(cces12$religpew_baptist, "1=1; else=0")
 
 vote12 <- cces12 %>%  filter(abc ==1 & complete.cases(candidate)) %>% 
   count(candidate, wt = weight_vv_post) %>% 
@@ -56,6 +59,7 @@ vote12 <- cces12 %>%  filter(abc ==1 & complete.cases(candidate)) %>%
 
 
 cces16$abc <- Recode(cces16$religpew_baptist, "2=1; else=0")
+cces16$sbc <- Recode(cces16$religpew_baptist, "1=1; else=0")
 
 vote16 <- cces16 %>%  filter(abc ==1 & complete.cases(candidate)) %>% 
   count(candidate, wt = commonweight_post) %>% 
@@ -96,7 +100,6 @@ cces08$bagain<-Recode(cces08$V215, "1='Born Again or Evangelical';
                          else = NA")
 
 
-
 ba16 <- cces16 %>%  filter(abc ==1) %>% 
   count(bagain, wt = commonweight_post) %>% 
   mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
@@ -109,19 +112,158 @@ ba08 <- cces08 %>%  filter(abc ==1) %>%
   count(bagain, wt = V201) %>% 
   mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
 
-
-
 baplot <- rbind(ba08, ba12, ba16)
+baplot <- filter(baplot, bagain == "Born Again or Evangelical")
+baplot$denom <- c("American Baptist")
 
-ggplot(baplot, aes(1, weight, fill= fct_rev(bagain))) + geom_col()  + coord_flip() +  
-  theme(axis.title.y = element_blank()) + 
-  theme(axis.ticks = element_blank(), axis.text.y = element_blank()) + ylab("Percent of Votes Cast") + 
+ba16 <- cces16 %>%  filter(sbc ==1) %>% 
+  count(bagain, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+ba12 <- cces12 %>%  filter(sbc ==1) %>% 
+  count(bagain, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+ba08 <- cces08 %>%  filter(sbc ==1) %>% 
+  count(bagain, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+
+sbcplot <- rbind(ba08, ba12, ba16)
+sbcplot <- filter(sbcplot, bagain == "Born Again or Evangelical")
+sbcplot$denom <- c("So. Baptist")
+
+
+cces16$evannd <- Recode(cces16$religpew_nondenom, "1:90=1; else=0")
+cces12$evannd <- Recode(cces12$religpew_nondenom, "1:90=1; else=0")
+cces08$evannd <- Recode(cces08$V224, "1:90=1; else=0")
+
+ndba16 <- cces16 %>%  filter(evannd ==1) %>% 
+  count(bagain, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+ndba12 <- cces12 %>%  filter(evannd ==1) %>% 
+  count(bagain, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+ndba08 <- cces08 %>%  filter(evannd ==1) %>% 
+  count(bagain, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+ndplot <- rbind(ndba08, ndba12, ndba16)
+ndplot <- filter(ndplot, bagain == "Born Again or Evangelical")
+ndplot$denom <- c("Non-Denom.")
+
+
+######### UMC
+
+cces16$umc <- Recode(cces16$religpew_methodist, "1=1; else=0")
+cces12$umc <- Recode(cces12$religpew_methodist, "1=1; else=0")
+cces08$umc <- Recode(cces08$V223, "1=1; else=0")
+
+umcba16 <- cces16 %>%  filter(umc ==1) %>% 
+  count(bagain, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+umcba12 <- cces12 %>%  filter(umc ==1) %>% 
+  count(bagain, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+umcba08 <- cces08 %>%  filter(umc ==1) %>% 
+  count(bagain, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+umcplot <- rbind(umcba08, umcba12, umcba16)
+umcplot <- filter(umcplot, bagain == "Born Again or Evangelical")
+umcplot$denom <- c("United Meth.")
+
+
+cces16$pcusa <- Recode(cces16$religpew_presby, "1=1; else=0")
+cces12$pcusa <- Recode(cces12$religpew_presby, "1=1; else=0")
+cces08$pcusa <- Recode(cces08$V226, "1=1; else=0")
+
+pcusaba16 <- cces16 %>%  filter(pcusa ==1) %>% 
+  count(bagain, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+pcusaba12 <- cces12 %>%  filter(pcusa ==1) %>% 
+  count(bagain, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+pcusaba08 <- cces08 %>%  filter(pcusa ==1) %>% 
+  count(bagain, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+pcusaplot <- rbind(pcusaba08, pcusaba12, pcusaba16)
+pcusaplot <- filter(pcusaplot, bagain == "Born Again or Evangelical")
+pcusaplot$denom <- c("PCUSA")
+
+mplot <- rbind(baplot, sbcplot, ndplot, umcplot, pcusaplot)
+
+ggplot(mplot, aes(x=denom, y=weight, fill = year)) + geom_col(position = "dodge") +  
+  theme(axis.ticks = element_blank()) + ylab("Percent Born Again or Evangelical") + 
   theme(legend.position="bottom") +
-  ggtitle("American Baptist Voters in Presidential Elections") +
+  ggtitle("What Denominations are Evangelical?") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(text=element_text(size=18, family="KerkisSans")) + 
-  scale_fill_manual(values=c("black","goldenrod1" )) +  
-  guides(fill = guide_legend(reverse = TRUE)) + labs(fill="")  + facet_grid(year ~ .) 
+  scale_fill_manual(values=c("chartreuse4","darkorange1", "dodgerblue3" )) +  
+  guides(fill = guide_legend(reverse = FALSE)) + labs(fill="")  + xlab("Denomination") 
 
+
+####
+
+cces16$pente <- Recode(cces16$religpew_pentecost, "1:90=1; else=0")
+cces12$pente <- Recode(cces12$religpew_pentecost, "1:90=1; else=0")
+cces08$pente <- Recode(cces08$V227, "1:90=1; else=0")
+
+penteba16 <- cces16 %>%  filter(pente ==1) %>% 
+  count(bagain, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+penteba12 <- cces12 %>%  filter(pente ==1) %>% 
+  count(bagain, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+penteba08 <- cces08 %>%  filter(pente ==1) %>% 
+  count(bagain, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+penteplot <- rbind(penteba08, penteba12, penteba16)
+penteplot <- filter(penteplot, bagain == "Born Again or Evangelical")
+penteplot$denom <- c("Pentecostal")
+
+
+####
+
+cces16$epis <- Recode(cces16$religpew_episcop, "1:90=1; else=0")
+cces12$epis <- Recode(cces12$religpew_episcop, "1:90=1; else=0")
+cces08$epis <- Recode(cces08$V228, "1:90=1; else=0")
+
+episba16 <- cces16 %>%  filter(epis ==1) %>% 
+  count(bagain, wt = commonweight_post) %>% 
+  mutate(weight = prop.table(n), year = c("2016")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+episba12 <- cces12 %>%  filter(epis ==1) %>% 
+  count(bagain, wt = weight_vv_post) %>% 
+  mutate(weight = prop.table(n), year = c("2012")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+episba08 <- cces08 %>%  filter(epis ==1) %>% 
+  count(bagain, wt = V201) %>% 
+  mutate(weight = prop.table(n), year = c("2008")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+
+episplot <- rbind(episba08, episba12, episba16)
+episplot <- filter(episplot, bagain == "Born Again or Evangelical")
+episplot$denom <- c("Episcopal")
+
+mplot <- rbind(baplot, sbcplot, ndplot, umcplot, pcusaplot, penteplot, episplot)
+
+ggplot(mplot, aes(x=denom, y=weight, fill = year)) + geom_col(position = "dodge") +  
+  theme(axis.ticks = element_blank()) + ylab("Percent Born Again or Evangelical") + 
+  theme(legend.position="bottom") +
+  ggtitle("What Denominations are Evangelical?") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(text=element_text(size=18, family="KerkisSans")) + 
+  scale_fill_manual(values=c("chartreuse4","darkorange1", "dodgerblue3" )) +  
+  guides(fill = guide_legend(reverse = FALSE)) + labs(fill="")  + xlab("Denomination") 
 
 
