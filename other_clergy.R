@@ -267,3 +267,5 @@ ggplot(melt_rav, aes(x = newval, y = variable))  +
   scale_fill_manual(values = c("#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "seagreen1")) + 
   theme(text=element_text(size=18, family="KerkisSans"))
 
+
+
