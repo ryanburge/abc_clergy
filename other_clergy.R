@@ -238,7 +238,7 @@ names(df5)<-c("denom", "rav")
 rav <- rbind(rav, df5)
 rav$label <- c("Religious Authority")
 
-ggplot(rav, aes(x=rav, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
+ggplot(rav %>% filter(denom != "Brethren"), aes(x=rav, y =label)) + geom_point(color = "black", shape=21, size =4, aes(fill = factor(denom))) + 
   theme(legend.title=element_blank()) +
   theme(legend.position = "bottom")  +  
   xlim(2,5) +

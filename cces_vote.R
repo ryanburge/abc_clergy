@@ -569,23 +569,23 @@ evanndab <- filter(evanndab, var ==1)
 
 episabany <- cces16 %>%  filter(epis ==1) %>% 
   count(var = abany, wt = commonweight_post) %>% 
-  mutate(weight = prop.table(n), sit = c("Any Reason"), denom = c("Episcopal ")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+  mutate(weight = prop.table(n), sit = c("Any Reason"), denom = c("Episcopal")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
 
 episabrape <- cces16 %>%  filter(epis ==1) %>% 
   count(var = abrape, wt = commonweight_post) %>% 
-  mutate(weight = prop.table(n), sit = c("Rape or Incest"), denom = c("Episcopal ")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+  mutate(weight = prop.table(n), sit = c("Rape or Incest"), denom = c("Episcopal")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
 
 episablate <- cces16 %>%  filter(epis ==1) %>% 
   count(var = ablate, wt = commonweight_post) %>% 
-  mutate(weight = prop.table(n), sit = c("Ban Late Term"), denom = c("Episcopal ")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+  mutate(weight = prop.table(n), sit = c("Ban Late Term"), denom = c("Episcopal")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
 
 episabins <- cces16 %>%  filter(epis ==1) %>% 
   count(var = abins, wt = commonweight_post) %>% 
-  mutate(weight = prop.table(n), sit = c("Insurance Cover"), denom = c("Episcopal ")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+  mutate(weight = prop.table(n), sit = c("Insurance Cover"), denom = c("Episcopal")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
 
 episabfund <- cces16 %>%  filter(epis ==1) %>% 
   count(var = abfund, wt = commonweight_post) %>% 
-  mutate(weight = prop.table(n), sit = c("Prohibit Govt. Funds"), denom = c("Episcopal ")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
+  mutate(weight = prop.table(n), sit = c("Prohibit Govt. Funds"), denom = c("Episcopal")) %>% mutate(weight = weight*100) %>% arrange(desc(weight))
 
 episablife <- cces16 %>%  filter(epis ==1) %>% 
   count(var = ablife, wt = commonweight_post) %>% 
@@ -676,7 +676,7 @@ pcusaatt <- cces16 %>%  filter(pcusa ==1 & complete.cases(attend)) %>%
 attplot <- rbind(abcatt, sbcatt, ndatt, episatt, umcatt, penteatt, pcusaatt)
 attplot <- filter(attplot, attend != "NaN")
 attplot <- filter(attplot, attend >0)
-#attplot$weight <- as.numeric(attplot$weight)
+attplot$weight <- as.numeric(attplot$weight)
 
 
 ggplot(abcatt, aes(x=attend, y=weight)) + geom_col(fill = "seagreen1", color = "black" ) +
