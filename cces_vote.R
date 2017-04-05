@@ -628,7 +628,7 @@ abortplot <- rbind(abcab, sbcab, pcusaab, episab, evanndab, penteab, umcab)
 ggplot(abortplot, aes(x = weight, y = sit))  +
   geom_point(shape=21, size =4, aes(fill = factor(denom))) +  theme(legend.title=element_blank())+
   scale_fill_manual(values = c("seagreen1", "#4DAF4A" , "#984EA3", "#FF7F00" , "#FFFF33" , "#A65628", "pink")) + 
-  ylab("Abortion Situation") + xlab("Percent in Favor of Abortion") +
+  ylab("Abortion Situation") + xlab("Percent in Favor") +
   ggtitle("Abortion Scenarios in 2016")+ 
   theme(text=element_text(size=16, family="KerkisSans")) + xlim(0,100)  +
   theme(plot.title = element_text(hjust = 0.5)) +
@@ -740,7 +740,7 @@ ggplot(abceduc, aes(x=educ, y=weight)) + geom_col(fill = "seagreen1", color = "b
 ggplot(educplot, aes(x=educ, y=weight, fill = denom)) + geom_col(position = "dodge") +  
   theme(axis.ticks = element_blank()) + ylab("Percent of Respodents") + 
   theme(legend.position="bottom") +
-  ggtitle("How Does Attendance Vary Across Denominations?") +
+  ggtitle("How Does Education Vary Across Denominations?") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(text=element_text(size=18, family="KerkisSans"))  +  
   guides(fill = guide_legend(reverse = FALSE)) + labs(fill="")  + xlab("") +
